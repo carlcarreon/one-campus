@@ -1,0 +1,101 @@
+# Local development with Laravel Sail (requires composer install).
+# Start: docker compose up -d --build
+# Assets: docker compose exec laravel.test npm run dev -- --host 0.0.0.0
+services:
+    laravel.test:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.5
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP:-1000}'
+        depends_on:
+            pgsql:
+                condition: service_healthy
+            rustfs:
+                condition: service_healthy
+        image: one-campus-sail:8.5
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-8000}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER:-1000}'
+            LARAVEL_SAIL: 1
+            DB_CONNECTION: '${DB_CONNECTION:-pgsql}'
+            DB_HOST: pgsql
+            DB_PORT: 5432
+            DB_DATABASE: '${DB_DATABASE:?Set DB_DATABASE in .env}'
+            DB_USERNAME: '${DB_USERNAME:?Set DB_USERNAME in .env}'
+            DB_PASSWORD: '${DB_PASSWORD:?Set DB_PASSWORD in .env}'
+            FILESYSTEM_DISK: '${FILESYSTEM_DISK:-s3}'
+            AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID in .env}'
+            AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY in .env}'
+            AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION:-us-east-1}'
+            AWS_BUCKET: '${AWS_BUCKET:?Set AWS_BUCKET in .env}'
+            # Container-to-container traffic uses RustFS's internal HTTP endpoint.
+            AWS_ENDPOINT: 'http://rustfs:9000'
+            AWS_USE_PATH_STYLE_ENDPOINT: 'true'
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+
+    pgsql:
+        image: postgres:17-alpine
+        ports:
+            - '127.0.0.1:${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:?Set DB_DATABASE in .env}'
+            POSTGRES_USER: '${DB_USERNAME:?Set DB_USERNAME in .env}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:?Set DB_PASSWORD in .env}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql/data'
+        networks:
+            - sail
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    rustfs:
+        image: rustfs/rustfs:latest
+        ports:
+            - '127.0.0.1:${FORWARD_RUSTFS_PORT:-9000}:9000'
+            - '127.0.0.1:${FORWARD_RUSTFS_CONSOLE_PORT:-9001}:9001'
+        environment:
+            RUSTFS_VOLUMES: /data
+            RUSTFS_ADDRESS: '0.0.0.0:9000'
+            RUSTFS_CONSOLE_ADDRESS: '0.0.0.0:9001'
+            RUSTFS_CONSOLE_ENABLE: 'true'
+            RUSTFS_ACCESS_KEY: '${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID in .env}'
+            RUSTFS_SECRET_KEY: '${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY in .env}'
+            RUSTFS_OBS_LOG_DIRECTORY: /logs
+        volumes:
+            - 'sail-rustfs:/data'
+            - 'sail-rustfs-logs:/logs'
+        networks:
+            - sail
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:9000/health']
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 30s
+
+networks:
+    sail:
+        driver: bridge
+
+volumes:
+    sail-pgsql:
+    sail-rustfs:
+    sail-rustfs-logs:
+
+
+
+
+
