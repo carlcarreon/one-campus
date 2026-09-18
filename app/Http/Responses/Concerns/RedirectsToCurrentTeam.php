@@ -10,6 +10,14 @@ trait RedirectsToCurrentTeam
 {
     protected function redirectPathForCurrentTeam(Request $request, string $redirect): string
     {
+        $user = $request->user();
+
+        abort_if(! $user, 403);
+
+        if ($user->hasAnyRole(['teacher', 'student', 'organization'])) {
+            return route('feed.index');
+        }
+
         $team = $this->currentTeam($request);
 
         URL::defaults(['current_team' => $team->slug]);

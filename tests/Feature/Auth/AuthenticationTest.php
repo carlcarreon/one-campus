@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
+use Spatie\Permission\Models\Role;
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
@@ -48,6 +49,21 @@ test('users can authenticate using the login screen', function () {
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard'));
 });
+
+test('teacher student and organization accounts land on the feed after login', function (string $role) {
+    Role::findOrCreate($role, 'web');
+
+    $user = User::factory()->create();
+    $user->assignRole($role);
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticatedAs($user);
+    $response->assertRedirect(route('feed.index'));
+})->with(['teacher', 'student', 'organization']);
 
 test('passkey login response redirects to the current team dashboard', function () {
     $user = User::factory()->create();

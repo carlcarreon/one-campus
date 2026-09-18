@@ -59,6 +59,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
+            'can' => [
+                'manageUsers' => $user?->can('manage-users') ?? false,
+            ],
             'demoAccount' => [
                 'isSwitchable' => ($user?->hasRole('superadmin') ?? false) || ($originalSuperadmin !== null && $user?->getKey() !== $originalSuperadmin->getKey()),
                 'isSwitched' => $originalSuperadmin !== null && $user?->getKey() !== $originalSuperadmin->getKey(),

@@ -2,11 +2,36 @@
 
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 test('guests cannot access user management', function () {
     $this->get(route('users.index', 'teachers'))->assertRedirect(route('login'));
 });
+
+test('authenticated users receive the user management capability for their role', function (string $roleName, bool $canManageUsers) {
+    $role = Role::findOrCreate($roleName, 'web');
+
+    if ($canManageUsers) {
+        $role->givePermissionTo(Permission::findOrCreate('manage-users', 'web'));
+    }
+
+    $user = User::factory()->create();
+    $user->assignRole($role);
+
+    $this->actingAs($user)
+        ->get(route('feed.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('can.manageUsers', $canManageUsers),
+        );
+})->with([
+    'admin' => ['admin', true],
+    'superadmin' => ['superadmin', true],
+    'teacher' => ['teacher', false],
+    'student' => ['student', false],
+    'organization' => ['organization', false],
+    'user' => ['user', false],
+]);
 
 test('authenticated users can view paginated users', function () {
     $user = User::factory()->create(['name' => 'Jane User']);
