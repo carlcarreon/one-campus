@@ -15,10 +15,14 @@ export default function EventsIndex() {
         : sampleEvents;
     const upcomingEvents = dateFilteredEvents
         .filter((event) => event.dateKey >= todayKey)
-        .sort((firstEvent, secondEvent) => firstEvent.dateKey.localeCompare(secondEvent.dateKey));
+        .sort((firstEvent, secondEvent) =>
+            firstEvent.dateKey.localeCompare(secondEvent.dateKey),
+        );
     const passedEvents = dateFilteredEvents
         .filter((event) => event.dateKey < todayKey)
-        .sort((firstEvent, secondEvent) => secondEvent.dateKey.localeCompare(firstEvent.dateKey));
+        .sort((firstEvent, secondEvent) =>
+            secondEvent.dateKey.localeCompare(firstEvent.dateKey),
+        );
 
     return (
         <>
@@ -28,9 +32,12 @@ export default function EventsIndex() {
                     <p className="text-sm font-semibold tracking-[0.18em] text-amber-700 uppercase dark:text-amber-400">
                         Campus calendar
                     </p>
-                    <h1 className="text-3xl font-bold tracking-tight">Upcoming Events</h1>
-                    <p className="max-w-2xl text-muted-foreground">
-                        Find out what is happening across the One Campus community.
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Upcoming Events
+                    </h1>
+                    <p className="text-muted-foreground max-w-2xl">
+                        Find out what is happening across the One Campus
+                        community.
                     </p>
                 </header>
 
@@ -44,7 +51,9 @@ export default function EventsIndex() {
                 >
                     <div className="space-y-6 lg:col-span-7">
                         <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
-                            <h2 className="text-xl font-semibold">Upcoming Events</h2>
+                            <h2 className="text-xl font-semibold">
+                                Upcoming Events
+                            </h2>
                             {selectedDate && (
                                 <button
                                     type="button"
@@ -57,40 +66,63 @@ export default function EventsIndex() {
                             )}
                         </div>
                         {selectedDate && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                                 Showing events for{' '}
-                                {new Intl.DateTimeFormat('en', { dateStyle: 'long' }).format(
-                                    new Date(`${selectedDate}T00:00:00`),
-                                )}
+                                {new Intl.DateTimeFormat('en', {
+                                    dateStyle: 'long',
+                                }).format(new Date(`${selectedDate}T00:00:00`))}
                             </p>
                         )}
-                        {(upcomingEvents.length > 0 || passedEvents.length > 0) && (
+                        {(upcomingEvents.length > 0 ||
+                            passedEvents.length > 0) && (
                             <div className="space-y-6">
                                 {upcomingEvents.length > 0 && (
-                                    <section aria-labelledby="upcoming-events-heading" className="space-y-3">
+                                    <section
+                                        aria-labelledby="upcoming-events-heading"
+                                        className="space-y-3"
+                                    >
                                         {upcomingEvents.map((event) => (
-                                            <EventCard key={`${event.dateKey}-${event.title}`} event={event} />
+                                            <EventCard
+                                                key={`${event.dateKey}-${event.title}`}
+                                                event={event}
+                                            />
                                         ))}
                                     </section>
                                 )}
                                 {passedEvents.length > 0 && (
-                                    <section aria-labelledby="passed-events-heading" className="space-y-3">
-                                        <h3 id="passed-events-heading" className="text-lg font-semibold text-[#641b2e] dark:text-rose-300">Passed events</h3>
+                                    <section
+                                        aria-labelledby="passed-events-heading"
+                                        className="space-y-3"
+                                    >
+                                        <h3
+                                            id="passed-events-heading"
+                                            className="text-lg font-semibold text-[#641b2e] dark:text-rose-300"
+                                        >
+                                            Passed events
+                                        </h3>
                                         {passedEvents.map((event) => (
-                                            <EventCard key={`${event.dateKey}-${event.title}`} event={event} isPassed />
+                                            <EventCard
+                                                key={`${event.dateKey}-${event.title}`}
+                                                event={event}
+                                                isPassed
+                                            />
                                         ))}
                                     </section>
                                 )}
                             </div>
                         )}
-                        {upcomingEvents.length === 0 && passedEvents.length === 0 && (
-                            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                                No events are scheduled for this date.
-                            </div>
-                        )}
+                        {upcomingEvents.length === 0 &&
+                            passedEvents.length === 0 && (
+                                <div className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
+                                    No events are scheduled for this date.
+                                </div>
+                            )}
                     </div>
 
-                    <aside className="lg:col-span-3" aria-label="Event date shortcuts">
+                    <aside
+                        className="lg:col-span-3"
+                        aria-label="Event date shortcuts"
+                    >
                         <EventCalendar
                             events={sampleEvents}
                             selectedDate={selectedDate}
