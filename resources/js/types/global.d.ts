@@ -15,6 +15,12 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             currentTeam: Team | null;
             teams: Team[];
+            demoAccount: {
+                isSwitchable: boolean;
+                isSwitched: boolean;
+                originalName: string | null;
+                accounts: Array<{ id: string; name: string; email: string }>;
+            };
             [key: string]: unknown;
         };
     }

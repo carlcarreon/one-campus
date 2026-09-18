@@ -1,5 +1,5 @@
-import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { BookOpen, Folder, LayoutGrid, Menu, Search, UserRoundCog } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -35,6 +38,8 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
+import { returnMethod as returnFromDemo } from '@/routes/demo-accounts';
+import { switchMethod as switchDemoAccount } from '@/routes/demo-accounts';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -59,7 +64,7 @@ const activeItemStyles =
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
-    const { auth, currentTeam } = page.props;
+    const { auth, currentTeam, demoAccount } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
     const dashboardUrl = currentTeam ? dashboard(currentTeam.slug) : '/';
@@ -74,6 +79,14 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     return (
         <>
+            {demoAccount.isSwitched && (
+                <div className="flex items-center justify-center gap-3 bg-amber-100 px-4 py-2 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-100">
+                    <span>Demo mode: acting as {auth.user.name} (original account: {demoAccount.originalName})</span>
+                    <Button size="sm" variant="outline" onClick={() => router.post(returnFromDemo.url())}>
+                        Return to Superadmin
+                    </Button>
+                </div>
+            )}
             <div className="border-sidebar-border/80 border-b">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                     {/* Mobile Menu */}
@@ -180,6 +193,34 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <div className="ml-auto flex items-center space-x-2">
+                        {(demoAccount.isSwitchable || demoAccount.isSwitched) && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" data-test="demo-account-switcher">
+                                        <UserRoundCog className="mr-2 size-4" /> Switch demo account
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel className="text-muted-foreground text-xs">
+                                        Demo accounts
+                                    </DropdownMenuLabel>
+                                    {demoAccount.accounts.map((account) => (
+                                        <DropdownMenuItem key={account.id} onSelect={() => router.post(switchDemoAccount.url(account.id))}>
+                                            <span>{account.name}</span>
+                                            <span className="ml-2 text-xs text-muted-foreground">{account.email}</span>
+                                        </DropdownMenuItem>
+                                    ))}
+                                    {demoAccount.isSwitched && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem onSelect={() => router.post(returnFromDemo.url())}>
+                                                Return to Superadmin
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                         <div className="relative flex items-center space-x-1">
                             <Button
                                 variant="ghost"

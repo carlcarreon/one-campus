@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DemoAccountController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\Teams\TeamInvitationController;
@@ -19,6 +20,9 @@ Route::prefix('{current_team}')
     });
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('demo-accounts/{user}/switch', [DemoAccountController::class, 'switch'])->name('demo-accounts.switch');
+    Route::post('demo-accounts/return', [DemoAccountController::class, 'return'])->name('demo-accounts.return');
+
     Route::middleware('can:manage-users')->group(function () {
         Route::get('{role}', [UserController::class, 'index'])->whereIn('role', ['teachers', 'students', 'organizations'])->name('users.index');
         Route::post('{role}', [UserController::class, 'store'])->whereIn('role', ['teachers', 'students', 'organizations'])->name('users.store');
