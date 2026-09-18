@@ -33,6 +33,12 @@ type EventCardProps = {
 
 export function EventCard({ event, isPassed = false }: EventCardProps) {
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const eventImages = event.imageUrls?.length
+        ? event.imageUrls
+        : event.imageUrl
+          ? [event.imageUrl]
+          : [];
+    const coverImage = eventImages[0];
 
     return (
         <>
@@ -59,6 +65,25 @@ export function EventCard({ event, isPassed = false }: EventCardProps) {
                             >
                                 {event.date}
                             </span>
+                            {event.visibility && (
+                                <span
+                                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-normal normal-case ${event.visibility === 'private' ? 'bg-rose-300/15 text-rose-800 dark:text-rose-200' : 'bg-amber-300/20 text-amber-800 dark:text-amber-200'}`}
+                                >
+                                    {event.visibility === 'organization'
+                                        ? 'Org only'
+                                        : event.visibility}
+                                </span>
+                            )}
+                            {event.targetOrganization && (
+                                <span className="text-muted-foreground text-[10px] font-medium tracking-normal normal-case">
+                                    for {event.targetOrganization}
+                                </span>
+                            )}
+                            {event.organization && (
+                                <span className="text-muted-foreground text-[10px] font-medium tracking-normal normal-case">
+                                    by {event.organization}
+                                </span>
+                            )}
                             {isPassed && (
                                 <span className="rounded bg-[#641b2e] px-2 py-0.5 text-[10px] text-white">
                                     Passed
@@ -116,11 +141,11 @@ export function EventCard({ event, isPassed = false }: EventCardProps) {
                     </div>
                 </div>
                 <div
-                    className={`relative col-span-4 min-h-40 overflow-hidden min-[520px]:min-h-48 ${event.imageUrl ? 'bg-gradient-to-br from-[#641b2e] via-[#7d273a] to-amber-700' : 'bg-muted'}`}
+                    className={`relative col-span-4 min-h-40 overflow-hidden min-[520px]:min-h-48 ${coverImage ? 'bg-gradient-to-br from-[#641b2e] via-[#7d273a] to-amber-700' : 'bg-muted'}`}
                 >
-                    {event.imageUrl ? (
+                    {coverImage ? (
                         <img
-                            src={event.imageUrl}
+                            src={coverImage}
                             alt={event.imageAlt ?? ''}
                             className="absolute inset-0 size-full object-cover"
                         />
@@ -132,7 +157,7 @@ export function EventCard({ event, isPassed = false }: EventCardProps) {
                             <ImageOff className="size-8" aria-hidden="true" />
                         </div>
                     )}
-                    {event.imageUrl && (
+                    {coverImage && (
                         <div
                             className="from-card via-card/70 pointer-events-none absolute inset-y-0 left-0 z-10 w-1/5 bg-gradient-to-r to-transparent"
                             aria-hidden="true"
@@ -150,6 +175,18 @@ export function EventCard({ event, isPassed = false }: EventCardProps) {
                             {event.description}
                         </DialogDescription>
                     </DialogHeader>
+                    {eventImages.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            {eventImages.map((image, index) => (
+                                <img
+                                    key={`${image.slice(0, 32)}-${index}`}
+                                    src={image}
+                                    alt={`${event.imageAlt ?? event.title} image ${index + 1}`}
+                                    className="aspect-video w-full rounded-md border object-cover"
+                                />
+                            ))}
+                        </div>
+                    )}
                     <div className="grid gap-3 text-sm">
                         <p>
                             <span className="font-semibold">Date:</span>{' '}

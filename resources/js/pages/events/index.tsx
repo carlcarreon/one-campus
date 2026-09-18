@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import { X } from 'lucide-react';
+import { CalendarPlus, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { EventCalendar } from '@/components/event/event-calendar';
 import { EventCard } from '@/components/event/event-card';
 import { HighlightEventCard } from '@/components/event/highlight-event-card';
 import { highlightedEvent, sampleEvents } from '@/pages/events/mock-data';
+import { CreateEventDialog, type PostedCampusEvent } from './create';
 
 export default function EventsIndex() {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [events, setEvents] = useState(sampleEvents);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
     const today = new Date();
     const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const dateFilteredEvents = selectedDate
-        ? sampleEvents.filter((event) => event.dateKey === selectedDate)
-        : sampleEvents;
+        ? events.filter((event) => event.dateKey === selectedDate)
+        : events;
     const upcomingEvents = dateFilteredEvents
         .filter((event) => event.dateKey >= todayKey)
         .sort((firstEvent, secondEvent) =>
@@ -28,17 +32,26 @@ export default function EventsIndex() {
         <>
             <Head title="Upcoming Events" />
             <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 md:p-8">
-                <header className="space-y-2">
-                    <p className="text-sm font-semibold tracking-[0.18em] text-amber-700 uppercase dark:text-amber-400">
-                        Campus calendar
-                    </p>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        Upcoming Events
-                    </h1>
-                    <p className="text-muted-foreground max-w-2xl">
-                        Find out what is happening across the One Campus
-                        community.
-                    </p>
+                <header className="flex flex-wrap items-end justify-between gap-4">
+                    <div className="space-y-2">
+                        <p className="text-sm font-semibold tracking-[0.18em] text-amber-700 uppercase dark:text-amber-400">
+                            Campus calendar
+                        </p>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            Upcoming Events
+                        </h1>
+                        <p className="text-muted-foreground max-w-2xl">
+                            Find out what is happening across the One Campus
+                            community.
+                        </p>
+                    </div>
+                    <Button
+                        type="button"
+                        onClick={() => setIsCreateOpen(true)}
+                        className="bg-[#641b2e] text-white hover:bg-[#4d1423]"
+                    >
+                        <CalendarPlus aria-hidden="true" /> Create event
+                    </Button>
                 </header>
 
                 <section aria-label="Highlighted event">
@@ -124,13 +137,21 @@ export default function EventsIndex() {
                         aria-label="Event date shortcuts"
                     >
                         <EventCalendar
-                            events={sampleEvents}
+                            events={events}
                             selectedDate={selectedDate}
                             onSelectDate={setSelectedDate}
                         />
                     </aside>
                 </section>
             </main>
+            <CreateEventDialog
+                open={isCreateOpen}
+                onOpenChange={setIsCreateOpen}
+                onCreate={(event: PostedCampusEvent) => {
+                    setEvents((current) => [event, ...current]);
+                    setSelectedDate(null);
+                }}
+            />
         </>
     );
 }

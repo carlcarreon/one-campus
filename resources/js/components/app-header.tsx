@@ -1,5 +1,12 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search, UserRoundCog } from 'lucide-react';
+import {
+    BookOpen,
+    Folder,
+    LayoutGrid,
+    Menu,
+    Search,
+    UserRoundCog,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -81,8 +88,15 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         <>
             {demoAccount.isSwitched && (
                 <div className="flex items-center justify-center gap-3 bg-amber-100 px-4 py-2 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-100">
-                    <span>Demo mode: acting as {auth.user.name} (original account: {demoAccount.originalName})</span>
-                    <Button size="sm" variant="outline" onClick={() => router.post(returnFromDemo.url())}>
+                    <span>
+                        Demo mode: acting as {auth.user.name} (original account:{' '}
+                        {demoAccount.originalName})
+                    </span>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => router.post(returnFromDemo.url())}
+                    >
                         Return to Superadmin
                     </Button>
                 </div>
@@ -109,7 +123,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     Navigation menu
                                 </SheetTitle>
                                 <SheetHeader className="flex justify-start text-left">
-                                    <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
+                                    <AppLogoIcon className="h-7 w-7 fill-current text-black dark:text-white" />
                                 </SheetHeader>
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
@@ -193,11 +207,17 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <div className="ml-auto flex items-center space-x-2">
-                        {(demoAccount.isSwitchable || demoAccount.isSwitched) && (
+                        {(demoAccount.isSwitchable ||
+                            demoAccount.isSwitched) && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="sm" data-test="demo-account-switcher">
-                                        <UserRoundCog className="mr-2 size-4" /> Switch demo account
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        data-test="demo-account-switcher"
+                                    >
+                                        <UserRoundCog className="mr-2 size-4" />{' '}
+                                        Switch demo account
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -205,15 +225,32 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         Demo accounts
                                     </DropdownMenuLabel>
                                     {demoAccount.accounts.map((account) => (
-                                        <DropdownMenuItem key={account.id} onSelect={() => router.post(switchDemoAccount.url(account.id))}>
+                                        <DropdownMenuItem
+                                            key={account.id}
+                                            onSelect={() =>
+                                                router.post(
+                                                    switchDemoAccount.url(
+                                                        account.id,
+                                                    ),
+                                                )
+                                            }
+                                        >
                                             <span>{account.name}</span>
-                                            <span className="ml-2 text-xs text-muted-foreground">{account.email}</span>
+                                            <span className="text-muted-foreground ml-2 text-xs">
+                                                {account.email}
+                                            </span>
                                         </DropdownMenuItem>
                                     ))}
                                     {demoAccount.isSwitched && (
                                         <>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem onSelect={() => router.post(returnFromDemo.url())}>
+                                            <DropdownMenuItem
+                                                onSelect={() =>
+                                                    router.post(
+                                                        returnFromDemo.url(),
+                                                    )
+                                                }
+                                            >
                                                 Return to Superadmin
                                             </DropdownMenuItem>
                                         </>

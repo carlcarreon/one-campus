@@ -9,5 +9,10 @@ export type CampusEvent = {
     calendarStart: string;
     calendarEnd: string;
     imageUrl?: string;
+    imageUrls?: string[];
     imageAlt?: string;
+    visibility?: 'public' | 'organization' | 'private';
+    organization?: string;
+    targetOrganization?: string;
+    inviteEmails?: string[];
 };

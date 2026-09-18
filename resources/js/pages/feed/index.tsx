@@ -212,26 +212,23 @@ export default function FeedIndex() {
     return (
         <>
             <Head title="Feed" />
-            <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 p-4 md:p-8">
+            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 md:p-8">
+                <header className="space-y-2">
+                    <p className="text-sm font-semibold tracking-[0.18em] text-amber-700 uppercase dark:text-amber-300">
+                        One Campus community
+                    </p>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Campus Feed
+                    </h1>
+                    <p className="text-muted-foreground max-w-2xl">
+                        See what’s happening around campus and share an update.
+                    </p>
+                </header>
                 <div className="grid gap-6 lg:grid-cols-10">
                     <section
                         className="min-w-0 space-y-4 lg:col-span-7"
                         aria-label="Campus posts"
                     >
-                        <header className="flex flex-wrap items-end justify-between gap-4">
-                            <div className="space-y-2">
-                                <p className="text-sm font-semibold tracking-[0.18em] text-amber-700 uppercase dark:text-amber-300">
-                                    One Campus community
-                                </p>
-                                <h1 className="text-3xl font-bold tracking-tight">
-                                    Campus Feed
-                                </h1>
-                                <p className="text-muted-foreground">
-                                    See what’s happening around campus and share
-                                    an update.
-                                </p>
-                            </div>
-                        </header>
                         <Card className="gap-4 p-4 sm:p-5">
                             <form onSubmit={publishPost} className="space-y-4">
                                 <div className="flex items-start gap-3">
