@@ -1,7 +1,7 @@
-import { Form } from "@inertiajs/react";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Form } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -10,11 +10,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import users from "@/routes/users";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import users from '@/routes/users';
 
-type UserRole = "teacher" | "student" | "organization";
+type UserRole = 'teacher' | 'student' | 'organization';
 
 type Props = {
     role: UserRole;
@@ -36,7 +36,8 @@ export default function CreateUserDialog({ role }: Props) {
                 <DialogHeader>
                     <DialogTitle>Add {role}</DialogTitle>
                     <DialogDescription>
-                        Create a new {role} account and assign it the {role} role.
+                        Create a new {role} account and assign it the {role}{' '}
+                        role.
                     </DialogDescription>
                 </DialogHeader>
                 <Form
@@ -49,29 +50,50 @@ export default function CreateUserDialog({ role }: Props) {
                         <>
                             <div className="grid gap-2">
                                 <label htmlFor="name">Name</label>
-                                <Input id="name" name="name" required autoFocus />
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    placeholder="Full name"
+                                    required
+                                    autoFocus
+                                />
                                 {errors.name && (
-                                    <p className="text-destructive text-sm">{errors.name}</p>
+                                    <p className="text-destructive text-sm">
+                                        {errors.name}
+                                    </p>
                                 )}
                             </div>
                             <div className="grid gap-2">
                                 <label htmlFor="email">Email</label>
-                                <Input id="email" name="email" type="email" required />
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="email@example.com"
+                                    required
+                                />
                                 {errors.email && (
-                                    <p className="text-destructive text-sm">{errors.email}</p>
+                                    <p className="text-destructive text-sm">
+                                        {errors.email}
+                                    </p>
                                 )}
                             </div>
                             <div className="grid gap-2">
-                                <label htmlFor="password">Temporary password</label>
+                                <label htmlFor="password">
+                                    Temporary password
+                                </label>
                                 <Input
                                     id="password"
                                     name="password"
                                     type="password"
+                                    placeholder="At least 8 characters"
                                     minLength={8}
                                     required
                                 />
                                 {errors.password && (
-                                    <p className="text-destructive text-sm">{errors.password}</p>
+                                    <p className="text-destructive text-sm">
+                                        {errors.password}
+                                    </p>
                                 )}
                             </div>
                             <DialogFooter>
@@ -83,7 +105,9 @@ export default function CreateUserDialog({ role }: Props) {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? "Creating..." : `Create ${role}`}
+                                    {processing
+                                        ? 'Creating...'
+                                        : `Create ${role}`}
                                 </Button>
                             </DialogFooter>
                         </>

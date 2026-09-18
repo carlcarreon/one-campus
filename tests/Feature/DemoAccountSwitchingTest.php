@@ -21,6 +21,7 @@ test('superadmins can switch into each seeded demo account and return to their a
         createDemoAccount('User', 'user@onecampus.edu', 'user'),
         createDemoAccount('Teacher', 'teacher@onecampus.edu', 'teacher'),
         createDemoAccount('Organization', 'org@onecampus.edu', 'organization'),
+        createDemoAccount('Student', 'student@onecampus.edu', 'student'),
     ];
 
     foreach ($targets as $target) {

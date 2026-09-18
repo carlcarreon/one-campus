@@ -68,12 +68,13 @@ class DemoAccountController extends Controller
      */
     private function isDemoAccount(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'user', 'teacher', 'organization'])
+        return $user->hasAnyRole(['admin', 'user', 'teacher', 'organization', 'student'])
             && in_array($user->email, [
                 'admin@onecampus.edu',
                 'user@onecampus.edu',
                 'teacher@onecampus.edu',
                 'org@onecampus.edu',
+                'student@onecampus.edu',
             ], true);
     }
 

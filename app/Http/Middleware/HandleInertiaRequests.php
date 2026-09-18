@@ -69,6 +69,7 @@ class HandleInertiaRequests extends Middleware
                         'user@onecampus.edu',
                         'teacher@onecampus.edu',
                         'org@onecampus.edu',
+                        'student@onecampus.edu',
                     ])->orderBy('name')->get(['id', 'name', 'email'])
                     : [],
             ],
