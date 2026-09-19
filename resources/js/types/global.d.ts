@@ -15,6 +15,7 @@ declare module '@inertiajs/core' {
             can: {
                 manageUsers: boolean;
             };
+            isAdminLayout: boolean;
             sidebarOpen: boolean;
             currentTeam: Team | null;
             teams: Team[];
@@ -22,6 +23,7 @@ declare module '@inertiajs/core' {
                 isSwitchable: boolean;
                 isSwitched: boolean;
                 originalName: string | null;
+                currentRole: string | null;
                 accounts: Array<{ id: string; name: string; email: string }>;
             };
             [key: string]: unknown;

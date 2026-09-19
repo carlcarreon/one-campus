@@ -62,10 +62,12 @@ class HandleInertiaRequests extends Middleware
             'can' => [
                 'manageUsers' => $user?->can('manage-users') ?? false,
             ],
+            'isAdminLayout' => $user?->hasAnyRole(['admin', 'superadmin']) ?? false,
             'demoAccount' => [
                 'isSwitchable' => ($user?->hasRole('superadmin') ?? false) || ($originalSuperadmin !== null && $user?->getKey() !== $originalSuperadmin->getKey()),
                 'isSwitched' => $originalSuperadmin !== null && $user?->getKey() !== $originalSuperadmin->getKey(),
                 'originalName' => $originalSuperadmin?->name,
+                'currentRole' => $user?->getRoleNames()->first(),
                 'accounts' => fn () => (($user?->hasRole('superadmin') ?? false) || ($originalSuperadmin !== null && $user?->getKey() !== $originalSuperadmin->getKey()))
                     ? User::query()->whereIn('email', [
                         'admin@onecampus.edu',

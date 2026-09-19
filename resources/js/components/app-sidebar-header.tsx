@@ -1,15 +1,32 @@
 import { useMemo, useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { Bell, Search } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { Bell, LogIn, Search, UserRoundCog } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { index as feedIndex } from '@/routes/feed';
 import { index as eventsIndex } from '@/routes/events';
 import { index as votingIndex } from '@/routes/voting';
 import { index as chatIndex } from '@/routes/chat';
+import {
+    returnMethod as returnFromDemo,
+    switchMethod as switchDemoAccount,
+} from '@/routes/demo-accounts';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 const searchablePages = [
@@ -24,6 +41,7 @@ export function AppSidebarHeader({
 }: {
     breadcrumbs?: BreadcrumbItemType[];
 }) {
+    const { demoAccount } = usePage().props;
     const [query, setQuery] = useState('');
     const filteredPages = useMemo(
         () => searchablePages.filter((page) => page.title.toLowerCase().includes(query.trim().toLowerCase())),
@@ -38,9 +56,58 @@ export function AppSidebarHeader({
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
+            {(demoAccount.isSwitchable || demoAccount.isSwitched) && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-auto"
+                            data-test="demo-account-switcher"
+                        >
+                            <UserRoundCog className="mr-2 size-4" aria-hidden="true" />
+                            {demoAccount.currentRole
+                                ? `${demoAccount.currentRole.charAt(0).toUpperCase()}${demoAccount.currentRole.slice(1)} Account`
+                                : 'Account'}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel className="text-muted-foreground text-xs">
+                            Demo accounts
+                        </DropdownMenuLabel>
+                        {demoAccount.accounts.map((account) => (
+                            <DropdownMenuItem
+                                key={account.id}
+                                data-test="demo-account-switcher-item"
+                                onSelect={() =>
+                                    router.post(
+                                        switchDemoAccount.url(account.id),
+                                    )
+                                }
+                            >
+                                <span>{account.name}</span>
+                                <span className="text-muted-foreground ml-2 text-xs">
+                                    {account.email}
+                                </span>
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+            {demoAccount.isSwitched && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    data-test="demo-account-return"
+                    onClick={() => router.post(returnFromDemo.url())}
+                >
+                    <LogIn className="mr-2 size-4" aria-hidden="true" />
+                    Return to Superadmin
+                </Button>
+            )}
             <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label="Notifications" className="ml-auto">
+                    <Button variant="ghost" size="icon" aria-label="Notifications">
                         <Bell aria-hidden="true" />
                     </Button>
                 </DialogTrigger>

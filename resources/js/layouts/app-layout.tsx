@@ -1,4 +1,6 @@
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import { usePage } from '@inertiajs/react';
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import type { BreadcrumbItem } from '@/types';
 
 export default function AppLayout({
@@ -8,9 +10,8 @@ export default function AppLayout({
     breadcrumbs?: BreadcrumbItem[];
     children: React.ReactNode;
 }) {
-    return (
-        <AppLayoutTemplate breadcrumbs={breadcrumbs}>
-            {children}
-        </AppLayoutTemplate>
-    );
+    const { isAdminLayout } = usePage().props;
+    const Layout = isAdminLayout ? AppSidebarLayout : AppHeaderLayout;
+
+    return <Layout breadcrumbs={breadcrumbs}>{children}</Layout>;
 }

@@ -1,16 +1,25 @@
-import { useState, type FormEvent } from 'react';
-import { Head } from '@inertiajs/react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Head, usePage } from '@inertiajs/react';
 import {
     ImagePlus,
     CalendarDays,
     MessageCircle,
     MoreHorizontal,
+    Search,
     Send,
     ThumbsUp,
+    X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { sampleEvents } from '@/pages/events/mock-data';
 import events from '@/routes/events';
 
@@ -33,6 +42,12 @@ type FeedPost = {
     liked: boolean;
     comments: FeedComment[];
     group?: string;
+};
+
+type ChatMessage = {
+    id: number;
+    text: string;
+    sender: 'me' | 'them';
 };
 
 const initialPosts: FeedPost[] = [
@@ -113,6 +128,7 @@ function InitialsAvatar({
 }
 
 export default function FeedIndex() {
+    const { url } = usePage();
     const [posts, setPosts] = useState(initialPosts);
     const [draft, setDraft] = useState('');
     const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>(
@@ -121,6 +137,49 @@ export default function FeedIndex() {
     const [activeFilter, setActiveFilter] = useState<'For you' | 'Following'>(
         'For you',
     );
+    const [activeUserQuery, setActiveUserQuery] = useState('');
+    const [isActiveUserSearchOpen, setIsActiveUserSearchOpen] =
+        useState(false);
+    const [selectedActiveUsers, setSelectedActiveUsers] = useState<FeedPost[]>(
+        [],
+    );
+    const [messageDrafts, setMessageDrafts] = useState<Record<string, string>>(
+        {},
+    );
+    const [chatMessages, setChatMessages] = useState<
+        Record<string, ChatMessage[]>
+    >({});
+    const chatScrollAreas = useRef<Record<string, HTMLDivElement | null>>({});
+    const messageInputs = useRef<Record<string, HTMLInputElement | null>>({});
+
+    useEffect(() => {
+        Object.values(chatScrollAreas.current).forEach((scrollArea) => {
+            if (scrollArea) {
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+            }
+        });
+    }, [chatMessages]);
+
+    function sendMessage(user: FeedPost): void {
+        const text = (messageDrafts[user.author] ?? '').trim();
+
+        if (!text) {
+            return;
+        }
+
+        setChatMessages((currentMessages) => ({
+            ...currentMessages,
+            [user.author]: [
+                ...(currentMessages[user.author] ?? []),
+                { id: Date.now(), text, sender: 'me' },
+            ],
+        }));
+        setMessageDrafts((currentDrafts) => ({
+            ...currentDrafts,
+            [user.author]: '',
+        }));
+        requestAnimationFrame(() => messageInputs.current[user.author]?.focus());
+    }
 
     function publishPost(event: FormEvent<HTMLFormElement>): void {
         event.preventDefault();
@@ -198,16 +257,28 @@ export default function FeedIndex() {
         }));
     }
 
-    const visiblePosts =
-        activeFilter === 'Following'
-            ? posts.filter((post) => post.group)
-            : posts;
+    const isOrganizationView = new URL(
+        url,
+        typeof window !== 'undefined'
+            ? window.location.origin
+            : 'http://localhost',
+    ).searchParams.get('view') === 'organizations';
+    const visiblePosts = isOrganizationView
+        ? posts.filter((post) => post.group)
+        : activeFilter === 'Following'
+          ? posts.filter((post) => post.group)
+          : posts;
     const today = new Date();
     const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const upcomingEvents = sampleEvents
         .filter((event) => event.dateKey >= todayKey)
         .sort((first, second) => first.dateKey.localeCompare(second.dateKey))
         .slice(0, 2);
+    const filteredActiveUsers = initialPosts.filter((user) =>
+        `${user.author} ${user.role}`
+            .toLowerCase()
+            .includes(activeUserQuery.trim().toLowerCase()),
+    );
 
     return (
         <>
@@ -493,9 +564,249 @@ export default function FeedIndex() {
                                 ))}
                             </div>
                         </Card>
+                        <Card className="mt-6 gap-2 overflow-hidden p-4">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <h2 className="font-semibold">
+                                        Messages
+                                    </h2>
+                                    <p className="text-muted-foreground mt-1 text-xs">
+                                        {initialPosts.length} conversations
+                                    </p>
+                                </div>
+                                <Dialog
+                                    open={isActiveUserSearchOpen}
+                                    onOpenChange={(open) => {
+                                        setIsActiveUserSearchOpen(open);
+                                        if (!open) {
+                                            setActiveUserQuery('');
+                                        }
+                                    }}
+                                >
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            aria-label="Search messages"
+                                        >
+                                            <Search aria-hidden="true" />
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent
+                                        showCloseButton={false}
+                                        className="gap-4 overflow-hidden rounded-3xl p-4 shadow-2xl sm:max-w-md"
+                                    >
+                                        <DialogTitle className="sr-only">
+                                            Search messages
+                                        </DialogTitle>
+                                        <Input
+                                            autoFocus
+                                            value={activeUserQuery}
+                                            onChange={(event) =>
+                                                setActiveUserQuery(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Search messages..."
+                                            aria-label="Search messages"
+                                            className="rounded-full"
+                                        />
+                                        <div className="grid gap-3">
+                                            {filteredActiveUsers.map((user) => (
+                                                <button
+                                                    type="button"
+                                                    key={user.author}
+                                                    className="hover:bg-muted flex w-full items-center gap-3 rounded-lg p-2 text-left"
+                                                    onClick={() => {
+                                                        setSelectedActiveUsers((currentUsers) =>
+                                                            currentUsers.some(
+                                                                (currentUser) =>
+                                                                    currentUser.author ===
+                                                                    user.author,
+                                                            )
+                                                                ? currentUsers
+                                                                : [...currentUsers, user],
+                                                        );
+                                                        setIsActiveUserSearchOpen(false);
+                                                    }}
+                                                >
+                                                    <InitialsAvatar
+                                                        initials={user.initials}
+                                                        name={user.author}
+                                                    />
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="flex items-center justify-between gap-3 text-sm font-medium">
+                                                            {user.author}
+                                                            <span className="text-muted-foreground shrink-0 text-xs font-normal">
+                                                                Active 3m ago
+                                                            </span>
+                                                        </p>
+                                                        <p className="text-muted-foreground max-w-full truncate text-xs">
+                                                            {user.role}
+                                                            {user.group &&
+                                                                !user.role.includes(user.group) &&
+                                                                ` · ${user.group}`}
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                            {filteredActiveUsers.length === 0 && (
+                                                <p className="text-muted-foreground text-sm">
+                                                    No messages found.
+                                                </p>
+                                            )}
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                            <div className="grid gap-3">
+                                {initialPosts.map((user) => (
+                                    <button
+                                        type="button"
+                                        key={user.author}
+                                        className="hover:bg-muted flex min-w-0 w-full items-center gap-3 overflow-hidden rounded-lg p-2 text-left"
+                                        onClick={() =>
+                                            setSelectedActiveUsers((currentUsers) =>
+                                                currentUsers.some(
+                                                    (currentUser) =>
+                                                        currentUser.author ===
+                                                        user.author,
+                                                )
+                                                    ? currentUsers
+                                                    : [...currentUsers, user],
+                                            )
+                                        }
+                                    >
+                                        <div className="relative">
+                                            <InitialsAvatar
+                                                initials={user.initials}
+                                                name={user.author}
+                                            />
+                                            <span className="border-card bg-emerald-500 absolute right-0 bottom-0 size-3 rounded-full border-2" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="max-w-full truncate text-sm font-medium">
+                                                {user.author}
+                                            </p>
+                                            <p className="text-muted-foreground max-w-full truncate text-xs">
+                                                {user.role}
+                                                {user.group &&
+                                                    !user.role.includes(user.group) &&
+                                                    ` · ${user.group}`}
+                                            </p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </Card>
                     </aside>
                 </div>
             </main>
+            {selectedActiveUsers.map((selectedActiveUser, index) => (
+                <Card
+                    key={selectedActiveUser.author}
+                    className="bg-background fixed bottom-20 z-50 w-[min(20rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl"
+                    style={{ right: `${1 + index * 21}rem` }}
+                >
+                    <div className="flex items-center justify-between border-b px-4 py-3">
+                        <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold">
+                                {selectedActiveUser.author}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                                Active 3m ago
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Close chat"
+                            onClick={() =>
+                                setSelectedActiveUsers((currentUsers) =>
+                                    currentUsers.filter(
+                                        (currentUser) =>
+                                            currentUser.author !==
+                                            selectedActiveUser.author,
+                                    ),
+                                )
+                            }
+                        >
+                            <X aria-hidden="true" />
+                        </Button>
+                    </div>
+                    <div className="p-4">
+                        <div
+                            ref={(scrollArea) => {
+                                chatScrollAreas.current[
+                                    selectedActiveUser.author
+                                ] = scrollArea;
+                            }}
+                            className="mb-4 h-52 space-y-2 overflow-y-auto"
+                        >
+                            {(chatMessages[selectedActiveUser.author] ?? []).length ===
+                            0 ? (
+                                <div className="bg-muted text-muted-foreground rounded-xl px-3 py-2 text-sm">
+                                    Start a conversation with{' '}
+                                    {selectedActiveUser.author}.
+                                </div>
+                            ) : (
+                                chatMessages[selectedActiveUser.author].map(
+                                    (message) => (
+                                        <div
+                                            key={message.id}
+                                            className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <p
+                                                className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${message.sender === 'me' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+                                            >
+                                                {message.text}
+                                            </p>
+                                        </div>
+                                    ),
+                                )
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                ref={(input) => {
+                                    messageInputs.current[
+                                        selectedActiveUser.author
+                                    ] = input;
+                                }}
+                                value={messageDrafts[selectedActiveUser.author] ?? ''}
+                                onChange={(event) =>
+                                    setMessageDrafts((currentDrafts) => ({
+                                        ...currentDrafts,
+                                        [selectedActiveUser.author]:
+                                            event.target.value,
+                                    }))
+                                }
+                                placeholder="Write a message..."
+                                aria-label="Write a message"
+                                className="rounded-full"
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        sendMessage(selectedActiveUser);
+                                    }
+                                }}
+                            />
+                            <Button
+                                type="button"
+                                size="icon"
+                                aria-label="Send message"
+                                disabled={
+                                    !(messageDrafts[selectedActiveUser.author] ?? '').trim()
+                                }
+                                onClick={() => sendMessage(selectedActiveUser)}
+                            >
+                                <Send aria-hidden="true" />
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            ))}
         </>
     );
 }
