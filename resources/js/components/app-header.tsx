@@ -93,6 +93,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     return (
         <>
+            <div className="bg-background sticky top-0 z-40">
             {demoAccount.isSwitched && (
                 <div className="flex items-center justify-center gap-3 bg-amber-100 px-4 py-2 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-100">
                     <span>
@@ -331,6 +332,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
                 </div>
             )}
+            </div>
             <nav
                 aria-label="Main navigation"
                 className="bg-background border-sidebar-border/80 fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
