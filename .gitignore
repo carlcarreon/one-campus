@@ -13,6 +13,7 @@
 /vendor
 .DS_Store
 .env
+.env.railway
 .env.backup
 .env.production
 .env.prod
