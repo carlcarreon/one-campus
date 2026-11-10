@@ -14,8 +14,22 @@ class LoginResponse implements LoginResponseContract
 
     public function toResponse($request): Response
     {
-        return $request->wantsJson()
-            ? new JsonResponse(['two_factor' => false], 200)
-            : redirect()->intended($this->redirectPathForCurrentTeam($request, Fortify::redirects('login')));
+        if ($request->wantsJson()) {
+            return new JsonResponse(['two_factor' => false], 200);
+        }
+
+        $user = $request->user();
+
+        // Only admin, superadmin, and org can access the dashboard.
+        if (!in_array($user->role, ['admin', 'superadmin', 'org'], true)) {
+            return redirect()->route('feed.index');
+        }
+
+        return redirect()->intended(
+            $this->redirectPathForCurrentTeam(
+                $request,
+                Fortify::redirects('login')
+            )
+        );
     }
 }

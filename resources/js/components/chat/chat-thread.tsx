@@ -1,10 +1,22 @@
+
 import { useState, type FormEvent } from 'react';
-import { LockKeyhole, Send, Settings2, UsersRound } from 'lucide-react';
+import {
+    LockKeyhole,
+    Send,
+    Settings2,
+    UsersRound,
+} from 'lucide-react';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { ChatConversation, ChatMessage } from '@/pages/chat/mock-data';
+
+import type {
+    ChatConversation,
+    ChatMessage,
+} from '@/types/chat';
+
 import { ConversationSettingsDialog } from './conversation-settings-dialog';
 import { MessageBubble } from './message-bubble';
 
@@ -20,9 +32,12 @@ export function ChatThread({
 
     function sendMessage(event: FormEvent<HTMLFormElement>): void {
         event.preventDefault();
+
         const message = draft.trim();
 
-        if (!message) return;
+        if (!message) {
+            return;
+        }
 
         onSend(message);
         setDraft('');
@@ -30,12 +45,16 @@ export function ChatThread({
 
     if (!conversation) {
         return (
-            <section className="hidden min-w-0 flex-1 items-center justify-center md:flex">
+            <section className="hidden min-h-0 min-w-0 flex-1 items-center justify-center md:flex">
                 <div className="text-center">
                     <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-300/15 text-amber-900 dark:text-amber-200">
                         <Send className="size-6" />
                     </span>
-                    <h2 className="mt-4 font-semibold">Your messages</h2>
+
+                    <h2 className="mt-4 font-semibold">
+                        Your messages
+                    </h2>
+
                     <p className="text-muted-foreground mt-1 text-sm">
                         Choose a conversation to get started.
                     </p>
@@ -58,10 +77,12 @@ export function ChatThread({
                         )}
                     </AvatarFallback>
                 </Avatar>
+
                 <div className="min-w-0 flex-1">
                     <h2 className="truncate text-sm font-semibold">
                         {conversation.name}
                     </h2>
+
                     <p className="text-muted-foreground truncate text-xs">
                         {isGroup
                             ? `${conversation.memberCount} members`
@@ -70,6 +91,7 @@ export function ChatThread({
                               : conversation.subtitle}
                     </p>
                 </div>
+
                 <div className="ml-auto flex shrink-0 items-center gap-2">
                     {isGroup && (
                         <Badge
@@ -79,9 +101,11 @@ export function ChatThread({
                             {conversation.visibility === 'private' && (
                                 <LockKeyhole aria-hidden="true" />
                             )}
+
                             {conversation.visibility} group
                         </Badge>
                     )}
+
                     <Button
                         type="button"
                         variant="ghost"
@@ -102,6 +126,7 @@ export function ChatThread({
                             ? `${conversation.name} · ${conversation.visibility} campus group`
                             : `This is the beginning of your conversation with ${conversation.name}.`}
                     </div>
+
                     {conversation.messages.map((message: ChatMessage) => (
                         <MessageBubble
                             key={message.id}
@@ -120,10 +145,15 @@ export function ChatThread({
                 <Input
                     aria-label="Write a message"
                     value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
-                    placeholder={`Message ${isGroup ? 'the group' : conversation.name}...`}
+                    onChange={(event) =>
+                        setDraft(event.target.value)
+                    }
+                    placeholder={`Message ${
+                        isGroup ? 'the group' : conversation.name
+                    }...`}
                     autoComplete="off"
                 />
+
                 <Button
                     type="submit"
                     disabled={!draft.trim()}
@@ -131,9 +161,12 @@ export function ChatThread({
                     aria-label="Send message"
                 >
                     <Send aria-hidden="true" />
-                    <span className="sr-only sm:not-sr-only">Send</span>
+                    <span className="sr-only sm:not-sr-only">
+                        Send
+                    </span>
                 </Button>
             </form>
+
             <ConversationSettingsDialog
                 conversation={conversation}
                 open={isSettingsOpen}

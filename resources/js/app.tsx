@@ -1,22 +1,36 @@
 import { StrictMode, useEffect } from 'react';
 import { createInertiaApp } from '@inertiajs/react';
-import { createRoot, hydrateRoot, type Root } from 'react-dom/client';
+import {
+    createRoot,
+    hydrateRoot,
+    type Root,
+} from 'react-dom/client';
+
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+
 import { initializeTheme } from '@/hooks/use-appearance';
+
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
+import './echo';
+
 const appName = import.meta.env.VITE_APP_NAME || 'One Campus';
 
 type InertiaRootWindow = Window & {
-    __oneCampusInertiaRoot?: { element: HTMLElement; root: Root };
+    __oneCampusInertiaRoot?: {
+        element: HTMLElement;
+        root: Root;
+    };
 };
 
 function DismissStartupLoader() {
     useEffect(() => {
-        const loader = document.getElementById('app-startup-loader');
+        const loader = document.getElementById(
+            'app-startup-loader',
+        );
 
         if (!loader) {
             return;
@@ -24,7 +38,10 @@ function DismissStartupLoader() {
 
         loader.dataset.ready = 'true';
 
-        const timeout = window.setTimeout(() => loader.remove(), 200);
+        const timeout = window.setTimeout(
+            () => loader.remove(),
+            200,
+        );
 
         return () => window.clearTimeout(timeout);
     }, []);
@@ -33,20 +50,26 @@ function DismissStartupLoader() {
 }
 
 void createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) =>
+        title ? `${title} - ${appName}` : appName,
+
     layout: (name) => {
         switch (true) {
             case name === 'welcome':
                 return null;
+
             case name.startsWith('auth/'):
                 return AuthLayout;
+
             case name.startsWith('settings/'):
             case name.startsWith('teams/'):
                 return [AppLayout, SettingsLayout];
+
             default:
                 return AppLayout;
         }
     },
+
     setup({ el, App, props }) {
         const app = (
             <StrictMode>
@@ -75,16 +98,19 @@ void createInertiaApp({
             ? hydrateRoot(el, app)
             : createRoot(el);
 
-        rootWindow.__oneCampusInertiaRoot = { element: el, root };
+        rootWindow.__oneCampusInertiaRoot = {
+            element: el,
+            root,
+        };
 
         if (!el.hasAttribute('data-server-rendered')) {
             root.render(app);
         }
     },
+
     progress: {
         color: '#4B5563',
     },
 });
 
-// This will set light / dark mode on load...
 initializeTheme();

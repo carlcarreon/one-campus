@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import type { ChatMessage } from '@/pages/chat/mock-data';
+import type { ChatMessage } from '@/types/chat';
 
 export function MessageBubble({
     message,

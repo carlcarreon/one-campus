@@ -1,48 +1,4 @@
-# Local development with Laravel Sail (requires composer install).
-# Start: docker compose up -d --build
-# Assets: docker compose exec laravel.test npm run dev -- --host 0.0.0.0
 services:
-    laravel.test:
-        build:
-            context: ./vendor/laravel/sail/runtimes/8.5
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP:-1000}'
-        depends_on:
-            pgsql:
-                condition: service_healthy
-            rustfs:
-                condition: service_healthy
-        image: one-campus-sail:8.5
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-8000}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
-        environment:
-            WWWUSER: '${WWWUSER:-1000}'
-            LARAVEL_SAIL: 1
-            DB_CONNECTION: '${DB_CONNECTION:-pgsql}'
-            DB_HOST: pgsql
-            DB_PORT: 5432
-            DB_DATABASE: '${DB_DATABASE:?Set DB_DATABASE in .env}'
-            DB_USERNAME: '${DB_USERNAME:?Set DB_USERNAME in .env}'
-            DB_PASSWORD: '${DB_PASSWORD:?Set DB_PASSWORD in .env}'
-            FILESYSTEM_DISK: '${FILESYSTEM_DISK:-s3}'
-            AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID in .env}'
-            AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY in .env}'
-            AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION:-us-east-1}'
-            AWS_BUCKET: '${AWS_BUCKET:?Set AWS_BUCKET in .env}'
-            # Container-to-container traffic uses RustFS's internal HTTP endpoint.
-            AWS_ENDPOINT: 'http://rustfs:9000'
-            AWS_USE_PATH_STYLE_ENDPOINT: 'true'
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - sail
-
     pgsql:
         image: postgres:17-alpine
         ports:
@@ -94,8 +50,4 @@ volumes:
     sail-pgsql:
     sail-rustfs:
     sail-rustfs-logs:
-
-
-
-
-
+    

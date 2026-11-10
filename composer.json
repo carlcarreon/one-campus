@@ -14,9 +14,11 @@
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
+        "laravel/reverb": "^1.12",
         "laravel/tinker": "^3.0",
-        "laravel/wayfinder": "^0.1.14",
+        "laravel/wayfinder": "^0.1.23",
         "league/flysystem-aws-s3-v3": "^3.0",
+        "pusher/pusher-php-server": "^7.3",
         "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {

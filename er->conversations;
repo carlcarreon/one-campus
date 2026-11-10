@@ -1,0 +1,14 @@
+[90m= [39m[34;4mApp\Models\User[39;24m {#7804
+    [34mid[39m: [32m"[39m[32m04d41694-a402-47e5-8e7d-e1311a3027f4[39m[32m"[39m,
+    [34mname[39m: [32m"[39m[32mAdmin[39m[32m"[39m,
+    [34memail[39m: [32m"[39m[32madmin@onecampus.edu[39m[32m"[39m,
+    [34memail_verified_at[39m: [36mnull[39m,
+    #[33mpassword[39m: [32m"[39m\$[32m2y[39m\$[32m12[39m\$[32mZITjV8CO7wmLcSBfJ7c3Se2wV.RQosoFanC9inyEhXET1ezp7qv3e[39m[32m"[39m,
+    #[33mremember_token[39m: [36mnull[39m,
+    [34mcreated_at[39m: [32m"[39m[32m2026-09-18 01:21:34[39m[32m"[39m,
+    [34mupdated_at[39m: [32m"[39m[32m2026-09-18 01:21:35[39m[32m"[39m,
+    #[33mtwo_factor_secret[39m: [36mnull[39m,
+    #[33mtwo_factor_recovery_codes[39m: [36mnull[39m,
+    [34mtwo_factor_confirmed_at[39m: [36mnull[39m,
+    [34mcurrent_team_id[39m: [35m1[39m,
+  }

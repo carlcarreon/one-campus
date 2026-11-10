@@ -34,6 +34,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');
     Route::delete('invitations/{invitation}', [TeamInvitationController::class, 'decline'])->name('invitations.decline');
+
+    // chat
+    Route::prefix('chat')->name('chat.')->group(function () {
+        Route::get('/', [ChatController::class, 'index'])
+            ->name('index');
+
+        Route::post('/groups', [ChatController::class, 'storeGroup'])
+            ->name('groups.store');
+
+        Route::get('/members', [ChatController::class, 'searchMembers'])
+            ->name('members.search');
+
+        Route::get('/{conversation}', [ChatController::class, 'show'])
+            ->name('show');
+
+        Route::post('/{conversation}/messages', [ChatController::class, 'store'])
+            ->name('messages.store');
+
+        Route::patch('/{conversation}/read', [ChatController::class, 'markAsRead'])
+            ->name('read');
+    });
+
 });
 
 require __DIR__.'/settings.php';

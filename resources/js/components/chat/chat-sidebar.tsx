@@ -1,11 +1,16 @@
-import { Search, UsersRound } from 'lucide-react';
+
+import { Plus, Search, UsersRound } from 'lucide-react';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { ChatConversation } from '@/pages/chat/mock-data';
 
-export type ConversationFilter = 'all' | 'direct' | 'groups';
+import type {
+    ChatConversation,
+    ConversationFilter,
+} from '@/types/chat';
 
 export function ChatSidebar({
     conversations,
@@ -15,6 +20,7 @@ export function ChatSidebar({
     onFilterChange,
     onSearchChange,
     onSelectConversation,
+    onCreateGroup,
 }: {
     conversations: ChatConversation[];
     activeConversationId: string | null;
@@ -23,14 +29,17 @@ export function ChatSidebar({
     onFilterChange: (filter: ConversationFilter) => void;
     onSearchChange: (search: string) => void;
     onSelectConversation: (conversationId: string) => void;
+    onCreateGroup: () => void;
 }) {
     const visibleConversations = conversations.filter((conversation) => {
         const matchesFilter =
             activeFilter === 'all' ||
             (activeFilter === 'direct' && conversation.type === 'direct') ||
             (activeFilter === 'groups' && conversation.type === 'group');
+
         const latestMessage =
             conversation.messages[conversation.messages.length - 1]?.text ?? '';
+
         const searchText = `${conversation.name} ${conversation.subtitle} ${latestMessage}`;
 
         return (
@@ -38,6 +47,7 @@ export function ChatSidebar({
             searchText.toLowerCase().includes(search.toLowerCase())
         );
     });
+
     const selectedTabStyle = (filter: ConversationFilter) =>
         activeFilter === filter
             ? {
@@ -48,24 +58,46 @@ export function ChatSidebar({
             : undefined;
 
     return (
-        <aside className="flex h-full min-h-0 w-full flex-col border-r">
+        <aside className="flex h-full min-h-0 w-full flex-col border-r md:w-[360px] md:shrink-0">
             <div className="space-y-4 border-b p-4">
-                <div>
-                    <h2 className="text-xl font-bold">Conversations</h2>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                        Group chats and personal chats
-                    </p>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                        <h2 className="text-xl font-bold">
+                            Conversations
+                        </h2>
+                        <p className="text-muted-foreground mt-1 text-xs">
+                            Group chats and personal chats
+                        </p>
+                    </div>
+
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={onCreateGroup}
+                        className="shrink-0 bg-[#641b2e] text-white hover:bg-[#4d1423]"
+                    >
+                        <Plus className="size-4" />
+                        <span className="hidden sm:inline">
+                            Create group
+                        </span>
+                        <span className="sm:hidden">Group</span>
+                    </Button>
                 </div>
+
                 <div className="relative">
                     <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+
                     <Input
                         aria-label="Search conversations"
                         value={search}
-                        onChange={(event) => onSearchChange(event.target.value)}
+                        onChange={(event) =>
+                            onSearchChange(event.target.value)
+                        }
                         placeholder="Search conversations"
                         className="pl-9"
                     />
                 </div>
+
                 <Tabs
                     value={activeFilter}
                     onValueChange={(value) =>
@@ -83,12 +115,14 @@ export function ChatSidebar({
                         >
                             All
                         </TabsTrigger>
+
                         <TabsTrigger
                             value="direct"
                             style={selectedTabStyle('direct')}
                         >
                             Direct
                         </TabsTrigger>
+
                         <TabsTrigger
                             value="groups"
                             style={selectedTabStyle('groups')}
@@ -107,6 +141,7 @@ export function ChatSidebar({
                                 conversation.messages[
                                     conversation.messages.length - 1
                                 ];
+
                             const isActive =
                                 conversation.id === activeConversationId;
 
@@ -117,8 +152,14 @@ export function ChatSidebar({
                                     onClick={() =>
                                         onSelectConversation(conversation.id)
                                     }
-                                    aria-current={isActive ? 'true' : undefined}
-                                    className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors ${isActive ? 'bg-amber-300/15' : 'hover:bg-muted/70'}`}
+                                    aria-current={
+                                        isActive ? 'true' : undefined
+                                    }
+                                    className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors ${
+                                        isActive
+                                            ? 'bg-amber-300/15'
+                                            : 'hover:bg-muted/70'
+                                    }`}
                                 >
                                     <span className="relative shrink-0">
                                         <Avatar className="size-11">
@@ -131,19 +172,23 @@ export function ChatSidebar({
                                                 )}
                                             </AvatarFallback>
                                         </Avatar>
+
                                         {conversation.isOnline && (
                                             <span className="border-card absolute right-0 bottom-0 size-3 rounded-full border-2 bg-green-500" />
                                         )}
                                     </span>
+
                                     <span className="min-w-0 flex-1">
                                         <span className="flex items-center justify-between gap-2">
                                             <span className="truncate text-sm font-semibold">
                                                 {conversation.name}
                                             </span>
+
                                             <span className="text-muted-foreground shrink-0 text-[11px]">
                                                 {conversation.updatedAt}
                                             </span>
                                         </span>
+
                                         <span className="mt-1 flex items-center justify-between gap-2">
                                             <span className="text-muted-foreground flex min-w-0 items-center gap-1 truncate text-xs">
                                                 {conversation.type ===
@@ -152,20 +197,21 @@ export function ChatSidebar({
                                                         variant="outline"
                                                         className="h-4 shrink-0 px-1.5 text-[9px] font-medium text-amber-800 dark:text-amber-300"
                                                     >
-                                                        {
-                                                            conversation.visibility
-                                                        }
+                                                        {conversation.visibility}
                                                     </Badge>
                                                 )}
+
                                                 <span className="truncate">
                                                     {latestMessage?.senderId ===
                                                     'you'
                                                         ? 'You: '
                                                         : ''}
+
                                                     {latestMessage?.text ??
                                                         conversation.subtitle}
                                                 </span>
                                             </span>
+
                                             {conversation.unreadCount > 0 && (
                                                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#641b2e] text-[10px] font-semibold text-white">
                                                     {conversation.unreadCount}
